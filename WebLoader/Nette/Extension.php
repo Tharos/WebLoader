@@ -9,6 +9,7 @@ use Nette\DI\Config\Helpers;
 use Nette\DI\ContainerBuilder;
 use Nette\Utils\Finder;
 use Nette;
+use WebLoader\FileNotFoundException;
 
 if (!class_exists('Nette\DI\CompilerExtension')) {
 	class_alias('Nette\Config\CompilerExtension', 'Nette\DI\CompilerExtension');
@@ -126,6 +127,14 @@ class Extension extends CompilerExtension
 					$files->addSetup('addFile', array((string) $foundFile));
 				}
 			} else {
+				if (!realpath($file)) {
+					$tmp = rtrim($config['sourceDir'], '/') . '/' . $file ;
+					if (!realpath($tmp)) {
+						throw new FileNotFoundException(sprintf("Neither '%s' or '%s' was found", $file, $tmp));
+					}
+					$file = $tmp;
+				}
+
 				$files->addSetup('addFile', array($file));
 			}
 		}
